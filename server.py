@@ -1,0 +1,17 @@
+import socket
+
+HOST = "::1" # Standard loopback interface address (localhost)
+PORT = 80  # Port to listen on (non-privileged ports are > 1023)
+
+with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
+    s.bind((HOST, PORT, 0, 0))
+    s.listen()
+    conn, addr = s.accept()
+    with conn:
+        print(f"Connected by {addr}")
+        while True:
+            data = conn.recv(1024)
+            if not data:
+                print(data)
+                break
+            conn.sendall(b'Ricevuto!')
