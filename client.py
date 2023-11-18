@@ -1,4 +1,5 @@
 import socket
+import time
 
 HOST = "::1"  # The server's hostname or IP address
 PORT = 80  # The port used by the server
@@ -9,4 +10,5 @@ with socket.socket(socket.AF_INET6, socket.SOCK_STREAM) as s:
         message = "Messaggio " + str(i)
         s.sendall(message.encode())
         data = s.recv(1024)
-        print(f"Received {data!r}")
+        print(f"Received {data.decode('utf-8')!r}")
+    time.sleep(60)
