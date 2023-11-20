@@ -1,12 +1,13 @@
 import socket
 
+print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
 PORT = 80  # Port to listen on (non-privileged ports are > 1023)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     HOST = socket.gethostbyname(socket.gethostname())
     print('IP address: ' + HOST)
-    print('Porta: ' + PORT)
+    print('Porta: ' + str(PORT))
     s.settimeout(60)
     s.bind((HOST, PORT))
     s.listen()
@@ -27,6 +28,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 condition = False
 
         config_pk_sender = conn.recv(2048).decode()
+        print("Dati di configurazione: ")
         print(config_pk_sender)
 
         # Mi configuro
@@ -40,31 +42,31 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
         while True:
             if send:
-                message_out = input('Scrivi messaggio | chiudi connessione | attendi: ')
+                message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
             else:
-                print('Aspetto un messaggio')
+                print('Aspetto un messaggio...')
                 in_message = conn.recv(2048)
                 print('Ho ricevuto il messaggio: ' + in_message.decode())
                 if in_message.decode() == 'WAIT':
-                    message_out = ''
                     send = True
                 elif in_message.decode() == 'CLOSE':
                     conn.close()
                     s.close()
                     print('Chiudo la connessione')
                     break
+                message_out = ''
 
-            if message_out == 'q':
+            if message_out.upper() == 'q'.upper():
                 print('Chiudo la connessione')
                 conn.sendall('CLOSE'.encode())
                 conn.close()
                 s.close()
                 break
-            elif message_out == 'd':
-                print('Mi metto in attesa')
+            elif message_out.upper() == 'd'.upper():
+                #print('Mi metto in attesa')
                 conn.sendall('WAIT'.encode())
                 send = False
             elif send:
-                print('Invio messaggio')
+                #print('Invio messaggio')
                 conn.sendall(message_out.encode())
 
