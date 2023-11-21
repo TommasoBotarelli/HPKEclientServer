@@ -1,5 +1,4 @@
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey
-from pyhpke.utils import base64url_decode
 
 kemID = KEMId.DHKEM_P256_HKDF_SHA256
 kdfID = KDFId.HKDF_SHA256
