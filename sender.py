@@ -74,9 +74,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     enc, sending = suite_s.create_sender_context(receiver_pk)
     s.sendall(enc)
     
-    ct = sending.seal(b"Messaggio sicuro!")
-    s.sendall(ct)
-    
     send = True
 
     while True:

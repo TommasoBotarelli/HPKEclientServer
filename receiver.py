@@ -4,12 +4,13 @@ from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
 
 print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
-PORT = 80  # Port to listen on (non-privileged ports are > 1023)
+PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     HOST = socket.gethostbyname(socket.gethostname())
     print('IP address: ' + HOST)
     print('Porta: ' + str(PORT))
+    print('Attendo una connessione...')
     s.settimeout(60)
     s.bind((HOST, PORT))
     s.listen()
@@ -72,11 +73,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             }
         )
         receiving = suite_r.create_recipient_context(enc, my_sk)
-        
-        ct = conn.recv(2048)
-        pt = receiving.open(ct).decode()
-        print(pt)
-        
+
         send = False
         message_out = ''
 
