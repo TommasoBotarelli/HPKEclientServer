@@ -1,13 +1,13 @@
 import socket
 import json
+from functions import *
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
+from threading import Thread
 
 print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
 PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
 
-x = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4"
-y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     HOST = socket.gethostbyname(socket.gethostname())
@@ -59,11 +59,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
         my_enc, sending = suite_r.create_sender_context(sender_pk)
         conn.sendall(my_enc)
+        s.settimeout(60)
 
-        send = False
-        message_out = ''
+        #send = False
+        #message_out = ''
+        outMessageThread = Thread(target = sendMessage, args = (conn, sending, s))
+        outMessageThread.start()
+    
+        inMessageThread = Thread(target = getMessage, args = (conn, receiving, s))
+        inMessageThread.start()
 
-        while True:
+        '''while True:
             if send:
                 message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
             else:
@@ -97,4 +103,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     print("CIFRO...")
                     conn.sendall(sending.seal(message_out.encode()))
                 else:
-                    conn.sendall(message_out.encode())
+                    conn.sendall(message_out.encode())'''

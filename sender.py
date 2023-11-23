@@ -1,13 +1,18 @@
 import socket
 import json
+from functions import *
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
+from threading import Thread
+
 
 kemID = 0x0010
 kdfID = 0x0001
 aeadID = 0x0003
-kid = "01"
-kty = "EC"
-crv = "P-256"
+info = b""
+sks = None # KEMKeyInterface
+psk = b""
+psk_id = b""
+eks = None # KEMKeyPair
 
 print("------------- Io sono il SENDER -------------")
 HOST = socket.gethostname()
@@ -40,10 +45,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         "KEMid": kemID,
         "KDFid": kdfID,
         "AEADid": aeadID,
-        "kid": kid,
-        "kty": kty,
-        "crv": crv
     }
+    '''
+    "info": info,
+    "sks": sks,
+    "psk": psk,
+    "psk_id": psk_id,
+    "eks": eks
+    '''
 
     message_to_server = json.dumps(config_message_to_server)
     s.sendall(message_to_server.encode())
@@ -71,10 +80,16 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     my_sk = keypair.private_key
     receiving = suite_s.create_recipient_context(other_enc, my_sk)
+    s.settimeout(60)
 
-    send = True
+    #send = True
+    outMessageThread = Thread(target = sendMessage, args = (s, sending))
+    outMessageThread.start()
+    
+    inMessageThread = Thread(target = getMessage, args = (s, receiving))
+    inMessageThread.start()
 
-    while True:
+    '''while True:
         if send:
             message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
         else:
@@ -106,5 +121,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 print("CIFRO...")
                 s.sendall(sending.seal(message_out.encode()))
             else:
-                s.sendall(message_out.encode())
+                s.sendall(message_out.encode())'''
 
