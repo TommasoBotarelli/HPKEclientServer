@@ -6,6 +6,9 @@ print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
 PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
 
+x = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4"
+y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
+
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     HOST = socket.gethostbyname(socket.gethostname())
     print('IP address: ' + HOST)
@@ -14,8 +17,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.settimeout(60)
     s.bind((HOST, PORT))
     s.listen()
-
-    #my_pk = '987654321'
 
     conn, addr = s.accept()
 
@@ -34,44 +35,23 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         config_pk_sender = json.loads(config_pk_sender)
         print("Dati di configurazione: ")
         print(config_pk_sender)
-        
-        my_pk = KEMKey.from_jwk(
-            {
-                "kid": config_pk_sender["kid"],
-                "kty": config_pk_sender["kty"],
-                "crv": config_pk_sender["crv"],
-                "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
-                "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
-            }
-        )
-        
-        my_pk_data = {
-            "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
-            "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
-        }
-        
-        # Mi configuro
 
-        #print(my_pk.to_public_bytes())
-        conn.sendall(json.dumps(my_pk_data).encode())
-        #conn.sendall(my_pk.to_public_bytes())
         s.settimeout(60)
         
         suite_r = CipherSuite.new(
-            KEMId(config_pk_sender["KEMid"]), KDFId(config_pk_sender["KDFid"]), AEADId(config_pk_sender["AEADid"])
+            KEMId(config_pk_sender["KEMid"]),
+            KDFId(config_pk_sender["KDFid"]),
+            AEADId(config_pk_sender["AEADid"])
         )
+
+        keypair = suite_r.kem.derive_key_pair(b"PUBLIC_KEY_PAIR")
+
+        my_pk = keypair.public_key
+        conn.sendall(my_pk.to_public_bytes())
+
         enc = conn.recv(2048)
-        
-        my_sk = KEMKey.from_jwk(
-            {
-                "kid": config_pk_sender["kid"],
-                "kty": config_pk_sender["kty"],
-                "crv": config_pk_sender["crv"],
-                "x": "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4",
-                "y": "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM",
-                "d": "870MB6gfuTJ4HtUnUvYMyJpr5eUZNP4Bk43bVdj3eAE"
-            }
-        )
+
+        my_sk = keypair.private_key
         receiving = suite_r.create_recipient_context(enc, my_sk)
 
         send = False

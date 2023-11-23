@@ -10,8 +10,8 @@ kty = "EC"
 crv = "P-256"
 
 print("------------- Io sono il SENDER -------------")
-HOST = input('Inserisci IP address del receiver: ')
-PORT = int(input('Inserisci porta del receiver: '))
+HOST = '192.168.56.1'
+PORT = 1024
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
@@ -20,19 +20,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     count = 0
     max_test = 10
-    
-    config_message_to_server = {
-        #"KEMid": 0x0010,
-        #"KDFid": 0x0001,
-        #"AEADid": 0x0003,
-        "KEMid": kemID,
-        "KDFid": kdfID,
-        "AEADid": aeadID,
-        "kid": kid,
-        "kty": kty,
-        "crv": crv,
-        "PK_sender": '123456789'
-    }
 
     while condition:
         data = s.recv(1024)
@@ -49,31 +36,32 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         else:
             s.close()
 
+    config_message_to_server = {
+        "KEMid": kemID,
+        "KDFid": kdfID,
+        "AEADid": aeadID,
+        "kid": kid,
+        "kty": kty,
+        "crv": crv
+    }
+
     message_to_server = json.dumps(config_message_to_server)
     s.sendall(message_to_server.encode())
 
-    receiver_pk = json.loads(s.recv(1024).decode())
-    
-    receiver_pk = KEMKey.from_jwk(
-        {
-            "kid": kid,
-            "kty": kty,
-            "crv": crv,
-            "x": receiver_pk["x"],
-            "y": receiver_pk["y"]
-        }
-    )
-    #receiver_pk = s.recv(1024)
-    #receiver_pk = KEMInterface.deserialize_public_key(KEMInterface(),key=receiver_pk)
-    #print("Chiave pubblica receiver: " + receiver_pk.to_public_bytes())
+    receiver_pk = s.recv(1024)
     s.settimeout(60)
-    
+
     suite_s = CipherSuite.new(
-        KEMId(kemID), KDFId(kdfID), AEADId(aeadID)
+        KEMId(kemID),
+        KDFId(kdfID),
+        AEADId(aeadID)
     )
+
+    receiver_pk = suite_s.kem.deserialize_public_key(receiver_pk)
+
     enc, sending = suite_s.create_sender_context(receiver_pk)
     s.sendall(enc)
-    
+
     send = True
 
     while True:
