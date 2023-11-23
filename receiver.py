@@ -1,6 +1,7 @@
 import socket
 import json
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
+from threading import Thread
 
 print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
@@ -8,6 +9,19 @@ PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
 
 x = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4"
 y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
+
+
+def sendMessage(sk):
+    while True:
+        message = input()
+        sk.sendall(message.encode())
+
+
+def getMessage(sk):
+    while True:
+        inMessage = sk.recv(1024).decode()
+        print(f'IN: {inMessage}')
+
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     HOST = socket.gethostbyname(socket.gethostname())
@@ -57,7 +71,17 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         send = False
         message_out = ''
 
-        while True:
+        outMessageThread = Thread(target=sendMessage, args=(conn,))
+        outMessageThread.start()
+
+        inMessageThread = Thread(target=getMessage, args=(conn,))
+        inMessageThread.start()
+
+        outMessageThread.join()
+        inMessageThread.join()
+
+
+        '''while True:
             if send:
                 message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
             else:
@@ -87,5 +111,5 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                 send = False
             elif send:
                 #print('Invio messaggio')
-                conn.sendall(message_out.encode())
+                conn.sendall(message_out.encode())'''
 
