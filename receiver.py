@@ -58,15 +58,21 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             AEADId(config_pk_sender["AEADid"])
         )
 
-        keypair = suite_r.kem.derive_key_pair(b"PUBLIC_KEY_PAIR")
+        keypair = suite_r.kem.derive_key_pair(b"")
 
         my_pk = keypair.public_key
         conn.sendall(my_pk.to_public_bytes())
+        sender_pk = conn.recv(1024)
 
-        enc = conn.recv(2048)
+        sender_pk = suite_r.kem.deserialize_public_key(sender_pk)
+
+        other_enc = conn.recv(2048)
 
         my_sk = keypair.private_key
-        receiving = suite_r.create_recipient_context(enc, my_sk)
+        receiving = suite_r.create_recipient_context(other_enc, my_sk)
+
+        my_enc, sending = suite_r.create_sender_context(sender_pk)
+        conn.sendall(my_enc)
 
         send = False
         message_out = ''
@@ -80,8 +86,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         outMessageThread.join()
         inMessageThread.join()
 
-
-        '''while True:
+        while True:
             if send:
                 message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
             else:
@@ -101,15 +106,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
             if message_out.upper() == 'q'.upper():
                 print('Chiudo la connessione')
-                conn.sendall('CLOSING'.encode())
+                conn.sendall(sending.seal('CLOSING'.encode()))
                 conn.close()
                 s.close()
                 break
             elif message_out.upper() == 'd'.upper():
                 #print('Mi metto in attesa')
-                conn.sendall('WAITING'.encode())
+                conn.sendall(sending.seal('WAITING'.encode()))
                 send = False
             elif send:
                 #print('Invio messaggio')
-                conn.sendall(message_out.encode())'''
-
+                if message_out != '':
+                    print("CIFRO...")
+                    conn.sendall(sending.seal(message_out.encode()))
+                else:
+                    conn.sendall(message_out.encode())

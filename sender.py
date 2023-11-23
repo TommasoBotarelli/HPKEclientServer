@@ -12,7 +12,7 @@ kty = "EC"
 crv = "P-256"
 
 print("------------- Io sono il SENDER -------------")
-HOST = '192.168.56.1'
+HOST = socket.gethostname()
 PORT = 1024
 
 
@@ -59,20 +59,30 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     message_to_server = json.dumps(config_message_to_server)
     s.sendall(message_to_server.encode())
-
-    receiver_pk = s.recv(1024)
-    s.settimeout(60)
-
+    
     suite_s = CipherSuite.new(
         KEMId(kemID),
         KDFId(kdfID),
         AEADId(aeadID)
     )
+    
+    keypair = suite_s.kem.derive_key_pair(b"")
+
+    my_pk = keypair.public_key
+    s.sendall(my_pk.to_public_bytes())
+    receiver_pk = s.recv(1024)
+
+    s.settimeout(60)
 
     receiver_pk = suite_s.kem.deserialize_public_key(receiver_pk)
 
-    enc, sending = suite_s.create_sender_context(receiver_pk)
-    s.sendall(enc)
+    my_enc, sending = suite_s.create_sender_context(receiver_pk)
+    s.sendall(my_enc)
+    
+    other_enc = s.recv(2048)
+
+    my_sk = keypair.private_key
+    receiving = suite_s.create_recipient_context(other_enc, my_sk)
 
     send = True
 
@@ -91,13 +101,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         else:
             print('Aspetto un messaggio...')
             in_message = s.recv(2048)
-            print('Ho ricevuto il messaggio: ' + in_message.decode())
-            if in_message.decode() == 'WAITING':
+            print("DECIFRO...")
+            in_message = receiving.open(in_message).decode()
+            if in_message == 'WAITING':
                 send = True
-            elif in_message.decode() == 'CLOSING':
+            elif in_message == 'CLOSING':
                 s.close()
                 print('Chiudo la connessione')
                 break
+            print('Ho ricevuto il messaggio: ' + in_message)
             message_out = ''
 
         if message_out.upper() == 'q'.upper():
