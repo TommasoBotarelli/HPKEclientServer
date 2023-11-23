@@ -1,26 +1,12 @@
 import socket
 import json
+from functions import *
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
 from threading import Thread
 
 print("------------- Io sono il RECEIVER -------------")
 # HOST = "::1"  # Standard loopback interface address (localhost)
 PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
-
-x = "MKBCTNIcKUSDii11ySs3526iDZ8AiTo7Tu6KPAqv7D4"
-y = "4Etl6SRW2YiLUrN5vfvVHuhp7x8PxltmWWlbbM4IFyM"
-
-
-def sendMessage(sk):
-    while True:
-        message = input()
-        sk.sendall(message.encode())
-
-
-def getMessage(sk):
-    while True:
-        inMessage = sk.recv(1024).decode()
-        print(f'IN: {inMessage}')
 
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
@@ -63,30 +49,27 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         my_pk = keypair.public_key
         conn.sendall(my_pk.to_public_bytes())
         sender_pk = conn.recv(1024)
-
+        
         sender_pk = suite_r.kem.deserialize_public_key(sender_pk)
-
+        
         other_enc = conn.recv(2048)
-
+        
         my_sk = keypair.private_key
         receiving = suite_r.create_recipient_context(other_enc, my_sk)
 
         my_enc, sending = suite_r.create_sender_context(sender_pk)
         conn.sendall(my_enc)
+        s.settimeout(60)
 
-        send = False
-        message_out = ''
-
-        outMessageThread = Thread(target=sendMessage, args=(conn,))
+        #send = False
+        #message_out = ''
+        outMessageThread = Thread(target = sendMessage, args = (conn, sending, s))
         outMessageThread.start()
-
-        inMessageThread = Thread(target=getMessage, args=(conn,))
+    
+        inMessageThread = Thread(target = getMessage, args = (conn, receiving, s))
         inMessageThread.start()
 
-        outMessageThread.join()
-        inMessageThread.join()
-
-        while True:
+        '''while True:
             if send:
                 message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
             else:
@@ -120,4 +103,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
                     print("CIFRO...")
                     conn.sendall(sending.seal(message_out.encode()))
                 else:
-                    conn.sendall(message_out.encode())
+                    conn.sendall(message_out.encode())'''

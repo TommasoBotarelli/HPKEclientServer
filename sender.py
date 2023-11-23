@@ -1,32 +1,22 @@
 import socket
 import json
+from functions import *
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
 from threading import Thread
-import concurrent.futures
+
 
 kemID = 0x0010
 kdfID = 0x0001
 aeadID = 0x0003
-kid = "01"
-kty = "EC"
-crv = "P-256"
+info = b""
+sks = None # KEMKeyInterface
+psk = b""
+psk_id = b""
+eks = None # KEMKeyPair
 
 print("------------- Io sono il SENDER -------------")
 HOST = socket.gethostname()
 PORT = 1024
-
-
-def sendMessage(sk):
-    while True:
-        message = input()
-        sk.sendall(message.encode())
-
-
-def getMessage(sk):
-    while True:
-        inMessage = sk.recv(1024).decode()
-        print(f'IN: {inMessage}')
-
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.connect((HOST, PORT))
@@ -54,8 +44,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     config_message_to_server = {
         "KEMid": kemID,
         "KDFid": kdfID,
-        "AEADid": aeadID
+        "AEADid": aeadID,
     }
+    '''
+    "info": info,
+    "sks": sks,
+    "psk": psk,
+    "psk_id": psk_id,
+    "eks": eks
+    '''
 
     message_to_server = json.dumps(config_message_to_server)
     s.sendall(message_to_server.encode())
@@ -83,17 +80,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     my_sk = keypair.private_key
     receiving = suite_s.create_recipient_context(other_enc, my_sk)
+    s.settimeout(60)
 
-    send = True
-
-    outMessageThread = Thread(target=sendMessage, args=(s,))
+    #send = True
+    outMessageThread = Thread(target = sendMessage, args = (s, sending))
     outMessageThread.start()
-
-    inMessageThread = Thread(target=getMessage, args=(s,))
+    
+    inMessageThread = Thread(target = getMessage, args = (s, receiving))
     inMessageThread.start()
-
-    outMessageThread.join()
-    inMessageThread.join()
 
     '''while True:
         if send:
