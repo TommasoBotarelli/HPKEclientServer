@@ -69,8 +69,6 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.sendall(my_pk.to_public_bytes())
     receiver_pk = s.recv(1024)
 
-    s.settimeout(60)
-
     receiver_pk = suite_s.kem.deserialize_public_key(receiver_pk)
 
     my_enc, sending = suite_s.create_sender_context(receiver_pk)
@@ -82,44 +80,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     receiving = suite_s.create_recipient_context(other_enc, my_sk)
     s.settimeout(60)
 
-    #send = True
-    outMessageThread = Thread(target = sendMessage, args = (s, sending))
+    outMessageThread = Thread(target = sendMessage, args=(s, sending))
     outMessageThread.start()
     
-    inMessageThread = Thread(target = getMessage, args = (s, receiving))
+    inMessageThread = Thread(target = getMessage, args=(s, receiving))
     inMessageThread.start()
 
-    '''while True:
-        if send:
-            message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
-        else:
-            print('Aspetto un messaggio...')
-            in_message = s.recv(2048)
-            print("DECIFRO...")
-            in_message = receiving.open(in_message).decode()
-            if in_message == 'WAITING':
-                send = True
-            elif in_message == 'CLOSING':
-                s.close()
-                print('Chiudo la connessione')
-                break
-            print('Ho ricevuto il messaggio: ' + in_message)
-            message_out = ''
-
-        if message_out.upper() == 'q'.upper():
-            print('Chiudo la connessione')
-            s.sendall(sending.seal('CLOSING'.encode()))
-            s.close()
-            break
-        elif message_out.upper() == 'd'.upper():
-            #print('Mi metto in attesa')
-            s.sendall(sending.seal('WAITING'.encode()))
-            send = False
-        elif send:
-            #print('Invio messaggio')
-            if message_out != '':
-                print("CIFRO...")
-                s.sendall(sending.seal(message_out.encode()))
-            else:
-                s.sendall(message_out.encode())'''
-
+    outMessageThread.join()
+    inMessageThread.join()

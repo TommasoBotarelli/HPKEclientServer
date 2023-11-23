@@ -61,46 +61,11 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         conn.sendall(my_enc)
         s.settimeout(60)
 
-        #send = False
-        #message_out = ''
         outMessageThread = Thread(target = sendMessage, args = (conn, sending, s))
         outMessageThread.start()
     
         inMessageThread = Thread(target = getMessage, args = (conn, receiving, s))
         inMessageThread.start()
 
-        '''while True:
-            if send:
-                message_out = input('Scrivi messaggio | chiudi connessione (q) | attendi (d): ')
-            else:
-                print('Aspetto un messaggio...')
-                in_message = conn.recv(2048)
-                print("DECIFRO...")
-                in_message = receiving.open(in_message).decode()
-                if in_message == 'WAITING':
-                    send = True
-                elif in_message == 'CLOSING':
-                    conn.close()
-                    s.close()
-                    print('Chiudo la connessione')
-                    break
-                print('Ho ricevuto il messaggio: ' + in_message)
-                message_out = ''
-
-            if message_out.upper() == 'q'.upper():
-                print('Chiudo la connessione')
-                conn.sendall(sending.seal('CLOSING'.encode()))
-                conn.close()
-                s.close()
-                break
-            elif message_out.upper() == 'd'.upper():
-                #print('Mi metto in attesa')
-                conn.sendall(sending.seal('WAITING'.encode()))
-                send = False
-            elif send:
-                #print('Invio messaggio')
-                if message_out != '':
-                    print("CIFRO...")
-                    conn.sendall(sending.seal(message_out.encode()))
-                else:
-                    conn.sendall(message_out.encode())'''
+        outMessageThread.join()
+        inMessageThread.join()
