@@ -61,11 +61,18 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         conn.sendall(my_enc)
         s.settimeout(60)
 
-        outMessageThread = Thread(target = sendMessage, args = (conn, sending, s))
+        outMessageThread = Thread(target = sendMessage, args = (conn, sending))
         outMessageThread.start()
     
-        inMessageThread = Thread(target = getMessage, args = (conn, receiving, s))
+        inMessageThread = Thread(target = getMessage, args = (conn, receiving, sending))
         inMessageThread.start()
 
-        outMessageThread.join()
         inMessageThread.join()
+        outMessageThread.join()
+
+        conn.close()
+        s.close()
+
+
+
+

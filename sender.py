@@ -69,6 +69,8 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.sendall(my_pk.to_public_bytes())
     receiver_pk = s.recv(1024)
 
+    s.settimeout(60)
+
     receiver_pk = suite_s.kem.deserialize_public_key(receiver_pk)
 
     my_enc, sending = suite_s.create_sender_context(receiver_pk)
@@ -83,8 +85,10 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     outMessageThread = Thread(target = sendMessage, args=(s, sending))
     outMessageThread.start()
     
-    inMessageThread = Thread(target = getMessage, args=(s, receiving))
+    inMessageThread = Thread(target = getMessage, args=(s, receiving, sending))
     inMessageThread.start()
 
-    outMessageThread.join()
     inMessageThread.join()
+    outMessageThread.join()
+
+    s.close()
