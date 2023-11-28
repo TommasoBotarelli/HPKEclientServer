@@ -9,9 +9,9 @@ f = open('sender_data.json')
 sender_data = json.load(f)
 # Only these = mode_base
 # See section A. 5 of the RFC for test vectors
-kemID = int(sender_data["kemID"], 16) if "kemID" in sender_data else  0x0010 # ID of KEM algorithm used
-kdfID = int(sender_data["kdfID"], 16) if "kdfID" in sender_data else 0x0001 # ID of KDF algorithm used
-aeadID = int(sender_data["aeadID"], 16) if "aeadID" in sender_data else 0x0003 # ID of AEAD algorithm used
+kemID = int(sender_data["kem_id"]) if "kem_id" in sender_data else  16 # ID of KEM algorithm used
+kdfID = int(sender_data["kdf_id"]) if "kdf_id" in sender_data else 1 # ID of KDF algorithm used
+aeadID = int(sender_data["aead_id"]) if "aead_id" in sender_data else 3 # ID of AEAD algorithm used
 
 # Set in JSON file:
 #DHKEM_P256_HKDF_SHA256 = 0x0010
