@@ -3,11 +3,14 @@ import sys
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
 from pyhpke.kem import KEM
 from pyhpke.kem_key import KEMKey
+from random import randrange
 
 
 f = open('test_data.json')
 test_data = json.load(f)
-test_data = test_data["test1"] # change test vector here
+i = randrange(4) + 1 
+test = "test" + str(i)
+test_data = test_data[test] # change test vector here
 mode = test_data["mode"]
 print("Mode: " + str(mode))
 
