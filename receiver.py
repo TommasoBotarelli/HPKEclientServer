@@ -12,7 +12,7 @@ my_sk = None # type: KEMKeyInterface, sks o skr, KEM sender/receiver private key
 eks = None # type: KEMKeyPair, ephemereal key
 psk = receiver_data["psk"] if "psk" in receiver_data else "" # a pre-shared key held by both the sender and the receiver
 psk_id = receiver_data["psk_id"] if "psk_id" in receiver_data else ""# an identifier for the PSK
-ikm = receiver_data["ikm"].encode() if "ikm" in receiver_data else b"" # optional, can be different for sender and receiver
+ikm = bytes.fromhex(receiver_data["ikm"]) if "ikm" in receiver_data else b"" # optional, can be different for sender and receiver
 my_info = receiver_data["info"] if "info" in receiver_data else "" # application-supplied information
 my_aad = receiver_data["aad"] if "aad" in receiver_data else "" # can be used for seal and open along with info
 
@@ -83,12 +83,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         other_hpke_data = json.loads(other_hpke_data)
         
         # encode in bytes of other data
-        my_info = my_info.encode()
-        my_aad = my_aad.encode()
-        psk = psk.encode()
-        psk_id = psk_id.encode()
-        other_info = other_hpke_data["other_info"].encode()
-        other_aad = other_hpke_data["other_aad"].encode()
+        my_info = bytes.fromhex(my_info)
+        my_aad = bytes.fromhex(my_aad)
+        psk = bytes.fromhex(psk)
+        psk_id = bytes.fromhex(psk_id)
+        other_info = bytes.fromhex(other_hpke_data["other_info"])
+        other_aad = bytes.fromhex(other_hpke_data["other_aad"])
         
         # the other serialized public key is received
         other_enc = conn.recv(2048)
