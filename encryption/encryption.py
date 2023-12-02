@@ -1,5 +1,6 @@
 import json
 from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKeyPair
+import random
 
 if __name__ == "__main__":
     # array delle chiavi da introdurre nel json in uscita
@@ -8,6 +9,10 @@ if __name__ == "__main__":
     # carico il file json con le informazioni per effettuare l'encryption
     f = open('encryption_info.json')
     v = json.load(f)
+
+    n_random = random.randint(0, len(list(v.keys()))-1)
+    print(f"Ho selezionato la configurazione {list(v.keys())[n_random]}")
+    v = v[list(v.keys())[n_random]]
 
     info_dict = {}
 
