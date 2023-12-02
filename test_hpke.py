@@ -6,7 +6,7 @@ from pyhpke.kem_key import KEMKey
 from random import randrange
 
 n_test = 4
-f = open('test_data.json')
+f = open('decryption/test_data.json')
 test_data = json.load(f)
 i = randrange(n_test) + 1 
 test = "test" + str(i)
