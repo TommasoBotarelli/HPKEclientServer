@@ -9,9 +9,9 @@ f = open('sender_data.json')
 sender_data = json.load(f)
 # Only these = mode_base
 # See section A. 5 of the RFC for test vectors
-kemID = int(sender_data["kem_id"]) if "kem_id" in sender_data else  16 # ID of KEM algorithm used
-kdfID = int(sender_data["kdf_id"]) if "kdf_id" in sender_data else 1 # ID of KDF algorithm used
-aeadID = int(sender_data["aead_id"]) if "aead_id" in sender_data else 3 # ID of AEAD algorithm used
+kemID = sender_data["kem_id"] if "kem_id" in sender_data else  16 # ID of KEM algorithm used
+kdfID = sender_data["kdf_id"] if "kdf_id" in sender_data else 1 # ID of KDF algorithm used
+aeadID = sender_data["aead_id"] if "aead_id" in sender_data else 3 # ID of AEAD algorithm used
 
 # Set in JSON file:
 #DHKEM_P256_HKDF_SHA256 = 0x0010
@@ -24,7 +24,7 @@ my_sk = None # type: KEMKeyInterface, sks o skr, KEM sender/receiver private key
 psk = sender_data["psk"] if "psk" in sender_data else "" # a pre-shared key held by both the sender and the receiver
 psk_id = sender_data["psk_id"] if "psk_id" in sender_data else "" # an identifier for the PSK
 eks = None # type: KEMKeyPair, ephemereal key
-ikm = sender_data["ikm"].encode() if "ikm" in sender_data else b"" # used for keys generation, can be different for sender and receiver
+ikm = bytes.fromhex(sender_data["ikm"]) if "ikm" in sender_data else b"" # used for keys generation, can be different for sender and receiver
 my_aad = sender_data["aad"] if "aad" in sender_data else "" # can be used for seal and open along with info
 
 print("------------- Io sono il SENDER -------------")
@@ -98,12 +98,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     other_hpke_data = json.loads(other_hpke_data)
     
     # encode in bytes of other data
-    my_info = my_info.encode()
-    my_aad = my_aad.encode()
-    psk = psk.encode()
-    psk_id = psk_id.encode()
-    other_info = other_hpke_data["other_info"].encode()
-    other_aad = other_hpke_data["other_aad"].encode()
+    my_info = bytes.fromhex(my_info)
+    my_aad = bytes.fromhex(my_aad)
+    psk = bytes.fromhex(psk)
+    psk_id = bytes.fromhex(psk_id)
+    other_info = bytes.fromhex(other_hpke_data["other_info"])
+    other_aad = bytes.fromhex(other_hpke_data["other_aad"])
 
     # the context to send data is created
     # enc is the serialized public key
