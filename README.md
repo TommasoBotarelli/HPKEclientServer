@@ -17,6 +17,6 @@ La repo è divisa in 3 cartelle:
 - `client-server/` cartella contenente i due eseguibili Python che simulano una comunicazione client server.
   Avviando i due eseguibili `receiver.py` e `sender.py` è possibile effettuare uno scambio di messaggi in modo sicuro utilizzando HPKE.
   Nei due file JSON `receiver_data.json` e `sender_data.json` si possono trovare le informazioni utili per la configurazione delle due entità.
-  I messaggi da inviare sono richiesti tramite input da tastiera;
+  I messaggi da inviare sono richiesti tramite input da tastiera e la comunicazione può avvenire in entrambi i sensi in modo asincrono.
 
 
