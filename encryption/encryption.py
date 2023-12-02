@@ -45,9 +45,11 @@ if __name__ == "__main__":
 
     # effettuo l'encryption
     if v["aead_id"] != 0xFFFF:
-        message = input('Scrivi messaggio: ').encode()
+        message = input('Scrivi messaggio: ')
+        pt = bytes.hex(message.encode())
+        info_dict["pt"] = pt
         aad = bytes.fromhex(v["aad"])
-        sealed = sender.seal(message, aad)
+        sealed = sender.seal(message.encode(), aad)
         info_dict["ct"] = bytes.hex(sealed)
 
     # salvo i risultati sul json
