@@ -10,8 +10,9 @@ La repo è divisa in 3 cartelle:
 
 - `encryption/` cartella contenente l'eseguibile Python che permette di effettuare l'encryption di un messaggio.
   Le configurazioni per effettuare l'encryption devono essere introdotte nel file `encryption_info.json`.
-  Questo eseguibile permette di richiedere da tastiera un messaggio di cui fare encryption e salvare in un json le informazioni necessarie per effettuare la decryption e il messaggio cifrato.
-  Il file JSON in uscita ha template simile ai test vectors che si sono utilizzati per testare l'implementazione. Questo rende possibile l'utilizzo di questo file per testare il funzionamento della parte di decryption del messaggio;
+  Questo file permette di contenere varie impostazioni che possono essere ricavate dai test vectors. L'eseguibile andrà a scegliere una configurazione casuale e effettuerà l'encryption utilizzando tale modalità di cifratura.
+  L'eseguibile poi permetterà di richiedere da tastiera un messaggio di cui fare encryption e salvare in un json le informazioni necessarie per effettuare la decryption (cioè le impostazioni di cifratura) e il messaggio cifrato.
+  Il file JSON in uscita ha template simile ai test vectors che si sono utilizzati per testare l'implementazione, quindi è aggiunto al file anche il testo in chiaro che ci si aspetta riuscire a recuperare con la parte di decryption;
 - `decryption/` cartella contenente l'eseguibile Python che permette di effettuare la decryption di un messagggio cifrato. TODO
 - `client-server/` cartella contenente i due eseguibili Python che simulano una comunicazione client server.
   Avviando i due eseguibili `receiver.py` e `sender.py` è possibile effettuare uno scambio di messaggi in modo sicuro utilizzando HPKE.
