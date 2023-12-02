@@ -1,7 +1,6 @@
 import json
 
-from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKeyInterface
-from pyhpke.kem import KEM
+from pyhpke import AEADId, CipherSuite, KDFId, KEMId
 from random import randrange
 import sys
 

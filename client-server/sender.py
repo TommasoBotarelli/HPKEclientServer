@@ -1,8 +1,7 @@
 import socket
 import json
-import random
 from functions import *
-from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
+from pyhpke import AEADId, CipherSuite, KDFId, KEMId
 from threading import Thread
 
 f = open('sender_data.json')
@@ -12,11 +11,6 @@ sender_data = json.load(f)
 kemID = sender_data["kem_id"] if "kem_id" in sender_data else  16 # ID of KEM algorithm used
 kdfID = sender_data["kdf_id"] if "kdf_id" in sender_data else 1 # ID of KDF algorithm used
 aeadID = sender_data["aead_id"] if "aead_id" in sender_data else 3 # ID of AEAD algorithm used
-
-# Set in JSON file:
-#DHKEM_P256_HKDF_SHA256 = 0x0010
-#HKDF_SHA256 = 0x0001
-#CHACHA20_POLY1305 = 0x0003
 
 # ALL OPTIONAL parameters for mode
 my_info = sender_data["info"] if "info" in sender_data else "" # application-supplied information

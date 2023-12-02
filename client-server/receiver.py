@@ -1,7 +1,7 @@
 import socket
 import json
 from functions import *
-from pyhpke import AEADId, CipherSuite, KDFId, KEMId, KEMKey, KEMInterface
+from pyhpke import AEADId, CipherSuite, KDFId, KEMId
 from threading import Thread
 
 f = open('receiver_data.json')
@@ -17,7 +17,6 @@ my_info = receiver_data["info"] if "info" in receiver_data else "" # application
 my_aad = receiver_data["aad"] if "aad" in receiver_data else "" # can be used for seal and open along with info
 
 print("------------- Io sono il RECEIVER -------------")
-# HOST = "::1"  # Standard loopback interface address (localhost)
 PORT = 1024  # Port to listen on (non-privileged ports are > 1023)
 
 with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
